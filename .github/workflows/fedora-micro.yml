@@ -34,6 +34,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Install qemu and dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static dnf
       - name: Check for changes
         run: |
           chmod +x ./check_for_rpm_changes.sh
