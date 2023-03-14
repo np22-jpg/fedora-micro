@@ -1,0 +1,32 @@
+# Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
+# Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
+ARG VERSION_ID
+FROM quay.io/fedora/fedora:${VERSION_ID} AS fedora-micro-build
+RUN mkdir -p /mnt/rootfs
+RUN source /etc/os-release && \
+    dnf install --releasever $VERSION_ID --nodocs -y \
+    --installroot /mnt/rootfs --setopt install_weak_deps=false \
+    --setopt=cachedir=/var/cache/dnf \
+    coreutils-single glibc-minimal-langpack && \
+    dnf --installroot /mnt/rootfs clean all && \
+    rm -rf /mnt/rootfs/var/log/dnf* /mnt/rootfs/var/log/yum.* && \
+    /bin/date +%Y%m%d_%H%M > /mnt/sys-root/etc/BUILDTIME
+
+FROM scratch AS fedora-micro
+LABEL maintainer="np22-jpg"
+
+LABEL name="np22-jpg/fedora-micro"
+LABEL version="$VERSION_ID"
+
+#label for EULA
+# LABEL com.fedora.license_terms="https://docs.fedoraproject.org/en-US/legal/"
+
+#labels for container catalog
+LABEL summary="Unofficial fedora micro image"
+LABEL description="Very small image which doesn't install the package manager."
+LABEL io.k8s.display-name="fedora-micro"
+# LABEL io.openshift.expose-services=""
+
+COPY --from=fedora-micro-build /mnt/rootfs/ /
+COPY --from=fedora-micro-build /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
+CMD /bin/sh
