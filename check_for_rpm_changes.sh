@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 remote_container=$1
-Containerfile=$2
+local_container=$2
 
 set -e
 
@@ -15,7 +15,7 @@ generate_rpm_list() {
         --setopt install_weak_deps=false \
         --nogpgcheck \
         --nodocs -y -q \
-        rpm 2>&1
+        rpm >/dev/null;
 
     chroot "$micromount" rpm -qa
 }
@@ -29,19 +29,19 @@ micromount=$(buildah mount "$microcontainer")
 source "$micromount"/etc/os-release
 
 echo Building on "$VERSION_ID"
-generate_rpm_list "$micromount" "$VERSION_ID" >"/tmp/current"
+generate_rpm_list "$micromount" "$VERSION_ID" >"current"
 
-buildah bud -t update_image:test -f "$Containerfile" --build-arg VERSION_ID="$VERSION_ID" --cap-add SYS_CHROOT .
-microcontainer=$(buildah from update_image:test)
+# buildah bud -t update_image:test -f "$local_container" --build-arg VERSION_ID="$VERSION_ID" --cap-add SYS_CHROOT .
+microcontainer=$(buildah from "$local_container")
 micromount=$(buildah mount "$microcontainer")
-generate_rpm_list "$micromount" "$VERSION_ID" >"/tmp/update"
+generate_rpm_list "$micromount" "$VERSION_ID" >"update"
 
 echo Generating Diff
-git diff -U0 /tmp/current /tmp/update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"/tmp/diff"
+git diff -U0 current update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"diff"
 
-cat /tmp/diff
+cat diff
 
-if [ -s /tmp/diff ]; then
+if [ -s diff ]; then
     echo Changes detected!
     exit 0
 else

@@ -44,10 +44,19 @@ jobs:
       #     mkdir -vp ~/.config/containers
       #     printf "[storage.options]\nmount_program=\"/usr/bin/fuse-overlayfs\"" > ~/.config/containers/storage.conf
 
-      # - name: Check for changes
-      #   run: |
-      #     chmod +x ./check_for_rpm_changes.sh
-      #     sudo ./check_for_rpm_changes.sh ${{ env.REPO }}:${{ matrix.version }} ${{ env.CONTAINERFILE }}
+      - id: build-test
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: fedora-micro
+          tags: test
+          containerfiles: |
+            ./${{ env.CONTAINERFILE }}
+          build-args: VERSION_ID=${{ matrix.version }}
+
+      - name: Check for changes
+        run: |
+          chmod +x ./check_for_rpm_changes.sh
+          buildah unshare ./check_for_rpm_changes.sh ${{ env.REPO }}:${{ matrix.version }} fedora-micro:test
 
       - id: build-image
         uses: redhat-actions/buildah-build@v2
