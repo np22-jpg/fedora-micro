@@ -10,7 +10,7 @@ RUN source /etc/os-release && \
     coreutils-single glibc-minimal-langpack && \
     dnf --installroot /mnt/rootfs clean all && \
     rm -rf /mnt/rootfs/var/log/dnf* /mnt/rootfs/var/log/yum.* && \
-    /bin/date +%Y%m%d_%H%M > /mnt/sys-root/etc/BUILDTIME
+    /bin/date +%Y%m%d_%H%M > /mnt/rootfs/etc/BUILDTIME
 
 FROM scratch AS fedora-micro
 LABEL maintainer="np22-jpg"
