@@ -8,7 +8,7 @@ on:
 
 # I don't think anyone will use these with s390x
 env:
-  ARCH: linux/amd64,linux/arm64,linux/ppc64le
+  PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le
   CONTAINERFILE: micro/Containerfile
   REPO: quay.io/np22-jpg/fedora-micro
 
@@ -50,7 +50,7 @@ jobs:
           tags: ${{ github.sha }} ${{ matrix.version }} ${{ matrix.tag }}
           containerfiles: |
             ./${{ env.CONTAINERFILE }}
-          archs: ${{ env.ARCH }}
+          platforms: ${{ env.PLATFORMS }}
           build-args: VERSION_ID=${{ matrix.version }}
 
       # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
