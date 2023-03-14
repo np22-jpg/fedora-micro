@@ -25,8 +25,8 @@ jobs:
             tag: rawhide
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    container:
-      image: quay.io/buildah/stable:latest
+    # container:
+    #   image: quay.io/buildah/stable:latest
       # options: --user root
 
     name: Push Docker image to Quay
@@ -34,10 +34,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      # - name: Install qemu and dnf
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y qemu-user-static dnf
+      - name: Install qemu and dnf
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static dnf
 
       # - run: |
       #     sudo apt-get install fuse-overlayfs
@@ -50,7 +50,7 @@ jobs:
           sudo ./check_for_rpm_changes.sh ${{ env.REPO }}:${{ matrix.version }} ${{ env.CONTAINERFILE }}
 
       - id: build-image
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@master
         with:
           image: fedora-micro
           tags: ${{ github.sha }} ${{ matrix.version }} ${{ matrix.tag }}
