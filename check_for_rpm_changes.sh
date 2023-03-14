@@ -30,14 +30,17 @@ source "$micromount"/etc/os-release
 
 echo Building on "$VERSION_ID"
 generate_rpm_list "$micromount" "$VERSION_ID" >"current"
+cat current
 
-# buildah bud -t update_image:test -f "$local_container" --build-arg VERSION_ID="$VERSION_ID" --cap-add SYS_CHROOT .
+echo 
 microcontainer=$(buildah from "$local_container")
 micromount=$(buildah mount "$microcontainer")
 generate_rpm_list "$micromount" "$VERSION_ID" >"update"
+cat update
 
 echo Generating Diff
-git diff -U0 current update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"diff" || true
+# git diff -U0 current update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"diff" || true
+diff current update
 
 cat diff
 
