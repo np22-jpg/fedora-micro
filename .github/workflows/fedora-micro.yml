@@ -24,7 +24,7 @@ jobs:
           - version: 39
             tag: rawhide
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     # container:
     #   image: quay.io/buildah/stable:latest
     #   options: --user root
@@ -39,10 +39,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-user-static dnf
 
-      - run: |
-          sudo apt-get install fuse-overlayfs
-          mkdir -vp ~/.config/containers
-          printf "[storage.options]\nmount_program=\"/usr/bin/fuse-overlayfs\"" > ~/.config/containers/storage.conf
+      # - run: |
+      #     sudo apt-get install fuse-overlayfs
+      #     mkdir -vp ~/.config/containers
+      #     printf "[storage.options]\nmount_program=\"/usr/bin/fuse-overlayfs\"" > ~/.config/containers/storage.conf
 
       - name: Check for changes
         run: |
