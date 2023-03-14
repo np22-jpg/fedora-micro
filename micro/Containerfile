@@ -1,7 +1,7 @@
 # Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
 # Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
 ARG VERSION_ID
-FROM quay.io/fedora/fedora:${VERSION_ID} AS fedora-micro-build
+FROM docker.io/library/fedora:${VERSION_ID} AS fedora-micro-build
 RUN mkdir -p /mnt/rootfs
 RUN source /etc/os-release && \
     dnf install --releasever $VERSION_ID --nodocs -y \
