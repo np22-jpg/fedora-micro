@@ -13,6 +13,7 @@ generate_rpm_list() {
         --installroot "$micromount" \
         --releasever "$VERSION_ID" \
         --setopt install_weak_deps=false \
+        --nogpgcheck \
         --nodocs -y -q \
         rpm >/dev/null
 
