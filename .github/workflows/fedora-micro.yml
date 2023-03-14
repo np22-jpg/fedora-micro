@@ -33,8 +33,8 @@ jobs:
 
       - name: Check for changes
         run: |
-          chmod +x check_for_rpm_changes.sh
-          check_for_rpm_changes.sh ${{ env.REPO }}:${{ matrix.version }} ${{ env.CONTAINERFILE }}
+          chmod +x ./check_for_rpm_changes.sh
+          ./check_for_rpm_changes.sh ${{ env.REPO }}:${{ matrix.version }} ${{ env.CONTAINERFILE }}
 
       - id: build-image
         uses: redhat-actions/buildah-build@v2
