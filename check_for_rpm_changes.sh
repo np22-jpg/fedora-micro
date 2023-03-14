@@ -15,7 +15,7 @@ generate_rpm_list() {
         --setopt install_weak_deps=false \
         --nogpgcheck \
         --nodocs -y -q \
-        rpm >/dev/null
+        rpm 2>&1
 
     chroot "$micromount" rpm -qa
 }
@@ -36,6 +36,7 @@ microcontainer=$(buildah from update_image:test)
 micromount=$(buildah mount "$microcontainer")
 generate_rpm_list "$micromount" "$VERSION_ID" >"update"
 
+echo Generating Diff
 git diff -U0 current update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"diff"
 
 cat diff
