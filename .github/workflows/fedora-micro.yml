@@ -50,7 +50,7 @@ jobs:
           sudo ./check_for_rpm_changes.sh ${{ env.REPO }}:${{ matrix.version }} ${{ env.CONTAINERFILE }}
 
       - id: build-image
-        uses: redhat-actions/buildah-build@master
+        uses: redhat-actions/buildah-build@v3
         with:
           image: fedora-micro
           tags: ${{ github.sha }} ${{ matrix.version }} ${{ matrix.tag }}
