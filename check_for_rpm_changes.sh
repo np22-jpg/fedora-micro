@@ -40,7 +40,7 @@ cat update
 
 echo Generating Diff
 # git diff -U0 current update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"diff" || true
-diff current update > "diff"
+diff current update > "diff" || true
 
 cat diff
 
