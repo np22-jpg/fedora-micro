@@ -38,6 +38,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static dnf
+
+      - run: |
+          sudo apt-get install fuse-overlayfs
+          mkdir -vp ~/.config/containers
+          printf "[storage.options]\nmount_program=\"/usr/bin/fuse-overlayfs\"" > ~/.config/containers/storage.conf
+
       - name: Check for changes
         run: |
           chmod +x ./check_for_rpm_changes.sh
