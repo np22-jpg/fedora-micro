@@ -51,7 +51,7 @@ jobs:
           containerfiles: |
             ./${{ env.CONTAINERFILE }}
           archs: ${{ env.ARCH }}
-          extra_args: VERSION_ID=${{ matrix.version }}
+          build-args: VERSION_ID=${{ matrix.version }}
 
       # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
       # in which case 'username' and 'password' can be omitted.
