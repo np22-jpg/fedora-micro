@@ -10,6 +10,8 @@ RUN source /etc/os-release && \
     coreutils-single glibc-minimal-langpack && \
     dnf --installroot /rootfs clean all && \
     rm -rf /rootfs/var/log/dnf* /rootfs/var/log/yum.* && \
+    echo "app:x:1000:" >> /etc/group && \
+    echo "app:x:1000:1000::/app:/bin/bash" >> /etc/passwd && \
     /bin/date +%Y%m%d_%H%M > /rootfs/etc/BUILDTIME
 
 FROM scratch AS fedora-micro

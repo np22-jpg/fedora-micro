@@ -37,7 +37,7 @@ micromount=$(buildah mount "$microcontainer")
 generate_rpm_list "$micromount" "$VERSION_ID" >"update"
 
 echo Generating Diff
-git diff -U0 current update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"diff"
+git diff -U0 current update | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' >"diff" || true
 
 cat diff
 
