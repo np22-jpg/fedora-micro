@@ -22,14 +22,13 @@ jobs:
             version: 38
           - images: node
             version: 39
-          - images: micro
         include:
           - version: 37
             tag: latest
           - version: 39
             tag: rawhide
           - images: node
-            node-versions: [ 16, 18 ]
+            node-version: 18
 
 
     runs-on: ubuntu-latest
@@ -53,7 +52,7 @@ jobs:
             ./${{ matrix.images }}/Containerfile
           build-args: |
             VERSION_ID=${{ matrix.version }}
-            NODE_VERSION=${{ matrix.node-versions }}
+            NODE_VERSION=${{ matrix.node-version }}
 
       - name: Check for changes
         run: |
@@ -63,14 +62,14 @@ jobs:
       - id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
-          image: fedora-${{ matrix.images }}${{ matrix.node-versions }}
+          image: fedora-${{ matrix.images }}${{ matrix.node-version }}
           tags: ${{ matrix.version }} ${{ matrix.tag }}
           containerfiles: |
             ./${{ matrix.images }}/Containerfile
           platforms: ${{ env.PLATFORMS }}
           build-args: |
             VERSION_ID=${{ matrix.version }}
-            NODE_VERSION=${{ matrix.node-versions }}
+            NODE_VERSION=${{ matrix.node-version }}
 
       - name: Push To quay.io
         id: push-to-quay
