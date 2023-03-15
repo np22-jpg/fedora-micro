@@ -17,16 +17,21 @@ jobs:
       matrix:
         version: [ 36, 37, 38, 39 ]
         images: [ micro, node ]
-        node-versions: [ 16, 18 ]
         include:
           - version: 37
             tag: latest
           - version: 39
             tag: rawhide
+          - images: node
+            node-versions: [ 16, 18 ]
+        exclude:
+          - images: node
+            version: [ 38, 39 ]
+
 
     runs-on: ubuntu-latest
 
-    name: Build and Push Docker Images
+    name: Docker Images
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
