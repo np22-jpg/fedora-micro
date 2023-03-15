@@ -8,14 +8,14 @@ on:
 
 # I don't think anyone will use these with s390x or ppc64le
 env:
-  PLATFORMS: linux/amd64,linux/arm64
+  PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
   
 jobs:
   build_and_push_docker_images:
     strategy:
       fail-fast: false
       matrix:
-        version: [ 37, 39 ]
+        version: [ 37, 38, 39 ]
         images: [ micro, node, npm, python3, python3-dev ]
         exclude:
           - images: node

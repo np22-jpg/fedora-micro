@@ -4,6 +4,7 @@ ARG VERSION_ID
 FROM quay.io/fedora/fedora:${VERSION_ID} AS release
 ARG NODE_VERSION
 RUN source /etc/os-release && \
+    if [[ $TARGETARCH == arm64 ]]; then TARGETARCH=aarch64; fi && \
     dnf module enable --releasever $VERSION_ID -y \
     nodejs:$NODE_VERSION && \
     dnf install --releasever $VERSION_ID -y \
