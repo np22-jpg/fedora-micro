@@ -6,9 +6,9 @@ on:
   schedule:
     - cron: '20 03 * * *'  # 3:20am everyday
 
-# I don't think anyone will use these with s390x
+# I don't think anyone will use these with s390x or ppc64le
 env:
-  PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le
+  PLATFORMS: linux/amd64,linux/arm64
   
 jobs:
   build_and_push_docker_images:
@@ -62,7 +62,7 @@ jobs:
       - id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
-          image: fedora-${{ matrix.images }}${{ matrix.node-version }}
+          image: fedora-${{ matrix.images }}
           tags: ${{ matrix.version }} ${{ matrix.tag }}
           containerfiles: |
             ./${{ matrix.images }}/Containerfile
@@ -96,16 +96,16 @@ jobs:
           echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
           echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
       
-      - name: Write signing key to disk (only needed for `cosign sign --key`)
-        run: echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+      # - name: Write signing key to disk
+      #   run: echo "${{ secrets.COSIGN_KEY }}" > cosign.key
 
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@main
+      # - name: Install Cosign
+      #   uses: sigstore/cosign-installer@main
 
-      - name: Sign Images with Cosign
-        run: |
-          cosign sign --key cosign.key \
-            quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
-            quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
-            docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
-            docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
+      # - name: Sign Images with Cosign
+      #   run: |
+      #     cosign sign --key cosign.key \
+      #       quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
+      #       quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
+      #       docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
+      #       docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
