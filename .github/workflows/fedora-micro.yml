@@ -92,8 +92,10 @@ jobs:
       - name: Write signing key to disk (only needed for `cosign sign --key`)
         run: echo "${{ secrets.COSIGN_KEY }}" > cosign.key
 
-      - name: Sign Images with Cosign
+      - name: Install Cosign
         uses: sigstore/cosign-installer@main
+
+      - name: Sign Images with Cosign
         run: |
           cosign sign --key cosign.key \
             quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
