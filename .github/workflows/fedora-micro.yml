@@ -17,6 +17,12 @@ jobs:
       matrix:
         version: [ 36, 37, 38, 39 ]
         images: [ micro, node ]
+        exclude:
+          - images: node
+            version: 38
+          - images: node
+            version: 39
+          - images: micro
         include:
           - version: 37
             tag: latest
@@ -24,12 +30,6 @@ jobs:
             tag: rawhide
           - images: node
             node-versions: [ 16, 18 ]
-        exclude:
-          - images: node
-            version: 38
-          - images: node
-            version: 39
-          - images: micro
 
 
     runs-on: ubuntu-latest
