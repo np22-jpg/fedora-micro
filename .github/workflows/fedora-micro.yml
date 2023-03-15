@@ -18,14 +18,22 @@ jobs:
         version: [ 36, 37, 38, 39 ]
         images: [ micro, node, npm ]
         exclude:
-          - images: [ node, npm ]
-            version: [ 38, 39 ]
+          - images: node
+            version: 38
+          - images: node
+            version: 39
+          - images: npm
+            version: 38
+          - images: npm
+            version: 39
         include:
           - version: 37
             tag: latest
           - version: 39
             tag: rawhide
-          - images: [ node, npm ]
+          - images: node
+            node-version: 18
+          - images: npm
             node-version: 18
 
 
