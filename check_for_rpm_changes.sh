@@ -7,8 +7,11 @@ set -e
 
 generate_rpm_list() {
     micromount=$1
+    VERSION_ID=$2
 
-    dnf list installed --installroot "$micromount"
+    dnf list installed \
+        --releasever="$VERSION_ID" \
+        --installroot "$micromount"
 }
 
 microcontainer=$(buildah from "$remote_container") ||
@@ -20,12 +23,12 @@ micromount=$(buildah mount "$microcontainer")
 source "$micromount"/etc/os-release
 
 echo Building on "$VERSION_ID"
-generate_rpm_list "$micromount" >"current"
+generate_rpm_list "$micromount" "$VERSION_ID" >"current"
 cat current
 
 microcontainer=$(buildah from "$local_container")
 micromount=$(buildah mount "$microcontainer")
-generate_rpm_list "$micromount" >"update"
+generate_rpm_list "$micromount" "$VERSION_ID" >"update"
 cat update
 
 echo Generating Diff
@@ -40,5 +43,3 @@ else
     echo No changes!
     exit 1
 fi
-
-if [[ $TARGETARCH == arm64 ]]; then TARGETARCH=aarch64; fi

@@ -19,7 +19,11 @@ jobs:
         images: [ micro, node, npm, python3, python3-dev ]
         exclude:
           - images: node
+            version: 38
+          - images: node          
             version: 39
+          - images: npm
+            version: 38
           - images: npm
             version: 39
         include:
