@@ -38,6 +38,8 @@ jobs:
 
 
     runs-on: ubuntu-latest
+    container:
+      image: quay.io/buildah/stable:latest
 
     name: Docker Images
     steps:
