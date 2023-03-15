@@ -16,18 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         version: [ 36, 37, 38, 39 ]
-        images: [ micro, node ]
+        images: [ micro, node, npm ]
         exclude:
-          - images: node
-            version: 38
-          - images: node
-            version: 39
+          - images: [ node, npm ]
+            version: [ 38, 39 ]
         include:
           - version: 37
             tag: latest
           - version: 39
             tag: rawhide
-          - images: node
+          - images: [ node, npm ]
             node-version: 18
 
 
@@ -57,7 +55,7 @@ jobs:
       - name: Check for changes
         run: |
           chmod +x ./check_for_rpm_changes.sh
-          buildah unshare ./check_for_rpm_changes.sh fedora-${{ matrix.images }}:${{ matrix.version }} fedora-micro:test
+          buildah unshare ./check_for_rpm_changes.sh quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }} fedora-micro:test
 
       - id: build-image
         uses: redhat-actions/buildah-build@v2
@@ -97,15 +95,16 @@ jobs:
           echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
       
       # - name: Write signing key to disk
-      #   run: echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+      #   run: echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
 
       # - name: Install Cosign
       #   uses: sigstore/cosign-installer@main
 
       # - name: Sign Images with Cosign
       #   run: |
-      #     cosign sign --key cosign.key \
+      #     cosign sign -y --key cosign.key \
       #       quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
       #       quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
       #       docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
       #       docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
+      #   env: COSIGN_PRIVATE_KEY=COSIGN_PASSWORD
