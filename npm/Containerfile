@@ -8,7 +8,7 @@ RUN source /etc/os-release && \
     nodejs:$NODE_VERSION && \
     dnf install --releasever $VERSION_ID -y \
     --setopt install_weak_deps=false \
-    nodejs npm curl jq zsh git && \
+    nodejs npm curl jq fish git && \
     dnf clean all && \
     npm install -g npm@latest && \
     npm i -g yarn && \
@@ -21,4 +21,4 @@ LABEL version="$VERSION_ID"
 LABEL summary="Unofficial Fedora npm image."
 LABEL description="A not-so-light image built for developing nodejs apps. Keeps in sync with fedora-node."
 
-CMD /usr/bin/zsh
+CMD /usr/bin/fish
