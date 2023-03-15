@@ -9,27 +9,24 @@ on:
 # I don't think anyone will use these with s390x
 env:
   PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le
-  CONTAINERFILE: micro/Containerfile
-  REPO: quay.io/np22-jpg/fedora-micro
-
+  
 jobs:
   build_and_push_docker_images:
     strategy:
       fail-fast: false
       matrix:
-        version: [36, 37, 38, 39]
+        version: [ 36, 37, 38, 39 ]
+        images: [ micro, node ]
+        node-versions: [ 16, 18 ]
         include:
           - version: 37
             tag: latest
           - version: 39
             tag: rawhide
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    # container:
-    #   image: quay.io/buildah/stable:latest
-      # options: --user root
 
-    name: Push Docker image to Quay
+    runs-on: ubuntu-latest
+
+    name: Build and Push Docker Images
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -39,37 +36,34 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-user-static dnf
 
-      # - run: |
-      #     sudo apt-get install fuse-overlayfs
-      #     mkdir -vp ~/.config/containers
-      #     printf "[storage.options]\nmount_program=\"/usr/bin/fuse-overlayfs\"" > ~/.config/containers/storage.conf
-
       - id: build-test
         uses: redhat-actions/buildah-build@v2
         with:
           image: fedora-micro
           tags: test
           containerfiles: |
-            ./${{ env.CONTAINERFILE }}
-          build-args: VERSION_ID=${{ matrix.version }}
+            ./${{ matrix.images }}/Containerfile
+          build-args: |
+            VERSION_ID=${{ matrix.version }}
+            NODE_VERSION=${{ matrix.node-versions }}
 
       - name: Check for changes
         run: |
           chmod +x ./check_for_rpm_changes.sh
-          buildah unshare ./check_for_rpm_changes.sh ${{ env.REPO }}:${{ matrix.version }} fedora-micro:test
+          buildah unshare ./check_for_rpm_changes.sh fedora-${{ matrix.images }}:${{ matrix.version }} fedora-micro:test
 
       - id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
-          image: fedora-micro
-          tags: ${{ github.sha }} ${{ matrix.version }} ${{ matrix.tag }}
+          image: fedora-${{ matrix.images }}
+          tags: ${{ matrix.version }} ${{ matrix.tag }}
           containerfiles: |
-            ./${{ env.CONTAINERFILE }}
+            ./${{ matrix.images }}/Containerfile
           platforms: ${{ env.PLATFORMS }}
-          build-args: VERSION_ID=${{ matrix.version }}
+          build-args: |
+            VERSION_ID=${{ matrix.version }}
+            NODE_VERSION=${{ matrix.node-versions }}
 
-      # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
-      # in which case 'username' and 'password' can be omitted.
       - name: Push To quay.io
         id: push-to-quay
         uses: redhat-actions/push-to-registry@v2
@@ -80,5 +74,29 @@ jobs:
           username: np22-jpg+fedoramicro
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
+      - name: Push To Docker Hub
+        id: push-to-docker
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: docker.io/np22jpg
+          username: np22jpg
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Print image url
-        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+        run:  |
+          echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+          echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
+      
+      - name: Write signing key to disk (only needed for `cosign sign --key`)
+        run: echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+
+      - name: Sign Images with Cosign
+        uses: sigstore/cosign-installer@main
+        run: |
+          cosign sign --key cosign.key \
+            quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
+            quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
+            docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
+            docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
