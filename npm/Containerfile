@@ -1,37 +1,24 @@
 # Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
 # Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
-ARG NODE_VERSION
 ARG VERSION_ID
-FROM quay.io/fedora/fedora:${VERSION_ID} AS fedora-micro-build
-RUN mkdir /rootfs
+FROM quay.io/fedora/fedora:${VERSION_ID} AS release
+ARG NODE_VERSION
 RUN source /etc/os-release && \
-    dnf module enable --releasever $VERSION_ID -y --installroot /rootfs \
-    nodejs:18/minimal && \
-    dnf install --releasever $VERSION_ID --nodocs -y \
-    --installroot /rootfs --setopt install_weak_deps=false \
-    --setopt=cachedir=/var/cache/dnf \
-    coreutils-single glibc-minimal-langpack nodejs npm curl-minimal && \
-    dnf --installroot /rootfs clean all && \
-    rm -rf /rootfs/var/log/dnf* /rootfs/var/log/yum.* && \
-    echo "node:x:1000:" >> /rootfs/etc/group && \
-    echo "node:x:1000:1000::/app:/bin/bash" >> /rootfs/etc/passwd && \
-    /bin/date +%Y%m%d_%H%M > /rootfs/etc/BUILDTIME
+    dnf module enable --releasever $VERSION_ID -y \
+    nodejs:$NODE_VERSION && \
+    dnf install --releasever $VERSION_ID -y \
+    --setopt install_weak_deps=false \
+    nodejs npm curl jq zsh && \
+    dnf clean all && \
+    npm install -g npm@latest && \
+    npm i -g yarn && \
+    /bin/date +%Y%m%d_%H%M > /etc/BUILDTIME
 
-FROM scratch AS fedora-micro
 LABEL maintainer="np22-jpg"
 
-LABEL name="np22-jpg/fedora-node"
+LABEL name="np22-jpg/fedora-npm"
 LABEL version="$VERSION_ID"
+LABEL summary="Unofficial Fedora npm image."
+LABEL description="A not-so-light image built for developing nodejs apps. Keeps in sync with fedora-node."
 
-#label for EULA
-# LABEL com.fedora.license_terms="https://docs.fedoraproject.org/en-US/legal/"
-
-#labels for container catalog
-LABEL summary="Unofficial Fedora node micro image"
-LABEL description="Very small image which doesn't install the package manager."
-LABEL io.k8s.display-name="fedora-node"
-# LABEL io.openshift.expose-services=""
-
-COPY --from=fedora-micro-build /rootfs/ /
-COPY --from=fedora-micro-build /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
-CMD /usr/bin/node
+CMD /usr/bin/zsh
