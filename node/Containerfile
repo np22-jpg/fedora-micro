@@ -14,6 +14,7 @@ RUN source /etc/os-release && \
     --forcearch=$TARGETARCH \
     --setopt=cachedir=/var/cache/dnf \
     coreutils-single glibc-minimal-langpack nodejs curl-minimal && \
+    dnf --installroot /rootfs list installed > /rootfs/etc/PACKAGES && \
     dnf --installroot /rootfs clean all && \
     rm -rf /rootfs/var/log/dnf* /rootfs/var/log/yum.* && \
     echo "node:x:1000:" >> /rootfs/etc/group && \

@@ -5,31 +5,9 @@ local_container=$2
 
 set -e
 
-generate_rpm_list() {
-    micromount=$1
-    VERSION_ID=$2
+podman run --name current "$remote_container" cat /etc/PACKAGES > "current" || echo "Packages not found!"
+podman run --name update "$local_container" cat /etc/PACKAGES > "update" || echo "Packages not found!"
 
-    dnf list installed \
-        --releasever="$VERSION_ID" \
-        --installroot "$micromount"
-}
-
-microcontainer=$(buildah from "$remote_container") ||
-    microcontainer=$(buildah from "quay.io/fedora/fedora")
-micromount=$(buildah mount "$microcontainer")
-
-# grabs VERSION_ID 
-# shellcheck source=/dev/null
-source "$micromount"/etc/os-release
-
-echo Building on "$VERSION_ID"
-generate_rpm_list "$micromount" "$VERSION_ID" >"current"
-cat current
-
-microcontainer=$(buildah from "$local_container")
-micromount=$(buildah mount "$microcontainer")
-generate_rpm_list "$micromount" "$VERSION_ID" >"update"
-cat update
 
 echo Generating Diff
 diff current update > "diff" || true

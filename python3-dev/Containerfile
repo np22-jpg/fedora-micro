@@ -2,10 +2,11 @@
 # Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
 ARG VERSION_ID
 FROM quay.io/fedora/fedora:${VERSION_ID} AS release
-RUN source /etc/os-release && \\
+RUN source /etc/os-release && \
     dnf install --releasever $VERSION_ID -y \
     --setopt install_weak_deps=false \
     python3 python3-pip curl wget jq fish && \
+    dnf list installed > /etc/PACKAGES && \
     dnf clean all && \
     /bin/date +%Y%m%d_%H%M > /etc/BUILDTIME
 
