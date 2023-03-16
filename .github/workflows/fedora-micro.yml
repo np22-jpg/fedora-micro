@@ -46,6 +46,27 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Log in to Quay.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: np22-jpg+fedoramicro
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry: quay.io/np22-jpg
+
+      - name: Log in to Docker Hub
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: np22jpg
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: docker.io
+
+      - name: Log in to GHCR
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          registry: ghcr.io/${{ github.repository_owner }}
+
       - id: build-test
         uses: redhat-actions/buildah-build@v2
         with:
@@ -57,7 +78,7 @@ jobs:
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
 
-      - name: Install qemu and dnf
+      - name: Install qemu and podman
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static podman
@@ -80,28 +101,6 @@ jobs:
           build-args: |
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
-
-
-      - name: Log in to Quay.io
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: np22-jpg+fedoramicro
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-          registry: quay.io/np22-jpg
-
-      - name: Log in to Docker Hub
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: np22jpg
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          registry: docker.io/np22jpg
-
-      - name: Log in to GHCR
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-          registry: ghcr.io/${{ github.repository_owner }}
 
 
       - name: Push To Quay.io
