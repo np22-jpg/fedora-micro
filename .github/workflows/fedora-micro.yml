@@ -12,6 +12,7 @@ env:
   
 jobs:
   build_and_push_docker_images:
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -35,7 +36,9 @@ jobs:
             node-version: 18
           - images: npm
             node-version: 18
-
+    permissions:
+      contents: read
+      packages: write
 
     runs-on: ubuntu-latest
     # container:
@@ -140,16 +143,16 @@ jobs:
 
       # SIGN
 
-      - uses: sigstore/cosign-installer@main 
+      - uses: sigstore/cosign-installer@v3.0.1 
       - name: Sign the images
         run:  |
-          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
-          cosign sign -y --key cosign.key quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
-          cosign sign -y --key cosign.key docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
-          cosign sign -y --key cosign.key ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
         env:
           QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
           DOCKER_TAGS: ${{ steps.push-to-docker.outputs.digest }}
           GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
