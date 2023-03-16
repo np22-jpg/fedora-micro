@@ -57,7 +57,6 @@ jobs:
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
 
-
       - name: Install qemu and dnf
         run: |
           sudo apt-get update
@@ -69,7 +68,8 @@ jobs:
           buildah unshare ./check_for_rpm_changes.sh quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }} fedora-micro:test
 
 
-      - id: build-image
+      - name: Build Image
+        id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: fedora-${{ matrix.images }}
@@ -81,15 +81,35 @@ jobs:
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
 
-      - name: Push To quay.io
+
+      - name: Log in to Quay.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: np22-jpg+fedoramicro
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry: quay.io/np22-jpg
+
+      - name: Log in to Docker Hub
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: np22jpg
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: docker.io/np22jpg
+
+      - name: Log in to GHCR
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          registry: ghcr.io/${{ github.repository_owner }}
+
+
+      - name: Push To Quay.io
         id: push-to-quay
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          registry: quay.io/np22-jpg
-          username: np22-jpg+fedoramicro
-          password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Push To Docker Hub
         id: push-to-docker
@@ -97,26 +117,31 @@ jobs:
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          registry: docker.io/np22jpg
-          username: np22jpg
-          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push To GHCR
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+
 
       - name: Print image url
         run:  |
           echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
           echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
-      
-      # - name: Write signing key to disk
-      #   run: echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
+          echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
 
-      # - name: Install Cosign
-      #   uses: sigstore/cosign-installer@main
-
-      # - name: Sign Images with Cosign
-      #   run: |
-      #     cosign sign -y --key cosign.key \
-      #       quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
-      #       quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
-      #       docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.version }}
-      #       docker.io/np22jpg/fedora-${{ matrix.images }}:${{ matrix.tag }}
-      #   env: COSIGN_PRIVATE_KEY=COSIGN_PASSWORD
+      - uses: sigstore/cosign-installer@main 
+      - name: Sign the images
+        run:  |
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
+          cosign sign -y --key cosign.key quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
+          cosign sign -y --key cosign.key docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
+          cosign sign -y --key cosign.key ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+        env:
+          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
+          DOCKER_TAGS: ${{ steps.push-to-docker.outputs.digest }}
+          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PASSWORD }}
