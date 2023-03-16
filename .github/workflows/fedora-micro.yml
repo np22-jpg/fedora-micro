@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         version: [ 37, 38, 39 ]
-        images: [ micro, node, npm, python3, python3-dev ]
+        images: [ micro, node, npm, python3, python3-dev, scratch ]
         exclude:
           - images: node
             version: 38
@@ -46,26 +46,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Log in to Quay.io
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: np22-jpg+fedoramicro
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-          registry: quay.io/np22-jpg
-
-      - name: Log in to Docker Hub
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: np22jpg
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          registry: docker.io
-
-      - name: Log in to GHCR
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-          registry: ghcr.io/${{ github.repository_owner }}
+      # BUILD
 
       - id: build-test
         uses: redhat-actions/buildah-build@v2
@@ -102,6 +83,29 @@ jobs:
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
 
+      # PUSH
+
+      - name: Log in to Quay.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: np22-jpg+fedoramicro
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry: quay.io/np22-jpg
+
+      - name: Log in to Docker Hub
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: np22jpg
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: docker.io
+
+      - name: Log in to GHCR
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          registry: ghcr.io/${{ github.repository_owner }}
+
 
       - name: Push To Quay.io
         id: push-to-quay
@@ -109,6 +113,7 @@ jobs:
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
+          registry: quay.io/np22-jpg
 
       - name: Push To Docker Hub
         id: push-to-docker
@@ -116,6 +121,7 @@ jobs:
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
+          registry: docker.io/np22jpg
 
       - name: Push To GHCR
         id: push-to-ghcr
@@ -123,6 +129,7 @@ jobs:
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
+          registry: ghcr.io/${{ github.repository_owner }}
 
 
       - name: Print image url
@@ -130,6 +137,8 @@ jobs:
           echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
           echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
           echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
+
+      # SIGN
 
       - uses: sigstore/cosign-installer@main 
       - name: Sign the images
