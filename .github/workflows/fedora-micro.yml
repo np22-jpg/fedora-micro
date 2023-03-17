@@ -167,7 +167,7 @@ jobs:
           cosign sign -y --key cosign.key docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
         env:
           COSIGN_EXPERIMENTAL: false
-          QUAY_TAGS: ${{ steps.push-to-docker.outputs.digest }}
+          DOCKER_TAGS: ${{ steps.push-to-docker.outputs.digest }}
 
       - name: Sign GHCR Image
         run:  |
