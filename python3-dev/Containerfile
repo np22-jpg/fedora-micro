@@ -13,7 +13,6 @@ RUN source /etc/os-release && \
 LABEL maintainer="np22-jpg"
 
 LABEL name="np22-jpg/fedora-python3-dev"
-LABEL version="$VERSION_ID"
 LABEL summary="Unofficial Fedora python3 development image."
 LABEL description="A not-so-light image built for developing python3 apps. Keeps in sync with fedora-python3."
 

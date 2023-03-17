@@ -18,7 +18,6 @@ RUN source /etc/os-release && \
 LABEL maintainer="np22-jpg"
 
 LABEL name="np22-jpg/fedora-npm"
-LABEL version="$VERSION_ID"
 LABEL summary="Unofficial Fedora npm image."
 LABEL description="A not-so-light image built for developing nodejs apps. Keeps in sync with fedora-node."
 

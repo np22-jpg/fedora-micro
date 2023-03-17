@@ -22,7 +22,6 @@ FROM scratch AS fedora-micro
 LABEL maintainer="np22-jpg"
 
 LABEL name="np22-jpg/fedora-micro"
-LABEL version="$VERSION_ID"
 
 #label for EULA
 # LABEL com.fedora.license_terms="https://docs.fedoraproject.org/en-US/legal/"

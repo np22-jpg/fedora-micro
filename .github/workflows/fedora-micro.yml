@@ -144,15 +144,35 @@ jobs:
       # SIGN
 
       - uses: sigstore/cosign-installer@v3.0.1 
-      - name: Sign the images
+      - name: Write Cosign Key
         run:  |
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+          echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
+          wc -c cosign.key;
         env:
-          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
-          DOCKER_TAGS: ${{ steps.push-to-docker.outputs.digest }}
-          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}       
+
+
+      - name: Sign Quay.io Image
+        run:  |
+          cosign login quay.io -u np22-jpg+fedoramicro -p ${{ secrets.REGISTRY_PASSWORD }}
+          cosign sign -y --key cosign.key quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
+        env:
+          COSIGN_EXPERIMENTAL: false
+          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
+
+      - name: Sign Docker Hub Image
+        run:  |
+          cosign login docker.io -u np22jpg -p ${{ secrets.DOCKER_PASSWORD }}
+          cosign sign -y --key cosign.key docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
+        env:
+          COSIGN_EXPERIMENTAL: false
+          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
+
+      - name: Sign GHCR Image
+        run:  |
+          cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
+          cosign sign -y --key cosign.key ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+        env:
+          COSIGN_EXPERIMENTAL: false
+          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
