@@ -10,7 +10,7 @@ RUN source /etc/os-release && \
     --installroot /rootfs --setopt install_weak_deps=false \
     # --forcearch=$TARGETARCH \
     --setopt=cachedir=/var/cache/dnf \
-    coreutils-single glibc-minimal-langpack && \
+    coreutils-single glibc-minimal-langpack glibc && \
     dnf --installroot /rootfs list installed > /rootfs/etc/PACKAGES && \
     dnf --installroot /rootfs clean all && \
     rm -rf /rootfs/var/log/dnf* /rootfs/var/log/yum.* && \
