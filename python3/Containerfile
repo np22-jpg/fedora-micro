@@ -1,9 +1,41 @@
 # Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
 # Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
 ARG VERSION_ID
+FROM registry.fedoraproject.org/fedora:${VERSION_ID} AS python-build
+WORKDIR /usr/src/python
+RUN dnf install --nodocs --setopt install_weak_deps=false \
+    autoconf bluez-libs-devel bzip2 bzip2-devel desktop-file-utils \
+    expat-devel findutils gcc-c++ gdb gdbm-devel git-core \
+    glibc-all-langpacks glibc-devel gmp-devel gnupg2 libGL-devel \
+    libX11-devel libappstream-glib libb2-devel libffi-devel \
+    libnsl2-devel libtirpc-devel libuuid-devel make mpdecimal-devel \
+    ncurses-devel openssl-devel pkgconfig python-pip-wheel \
+    python-setuptools-wheel python3-rpm-generators python3.11 \
+    readline-devel sqlite-devel tar tcl-devel tix-devel tk-devel \
+    tzdata valgrind-devel xz-devel zlib-devel && \
+    curl -f https://www.python.org/ftp/python/3.11.2/Python-3.11.2.tar.xz | \
+    tar -xfC /usr/src/python --strip-components=1 && \
+    	./configure \
+		--enable-loadable-sqlite-extensions \
+		--enable-optimizations \
+		--enable-option-checking=fatal \
+		--enable-shared \
+		--with-lto \
+		--with-system-expat \
+		--without-ensurepip && \
+    LDFLAGS="-s" make -j$(nproc) && \
+    make install && \
+    find /usr/local -depth \
+    \( \
+        \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
+        -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name 'libpython*.a' \) \) \
+    \) -exec rm -rf '{}' + \
+
+
 FROM registry.fedoraproject.org/fedora:${VERSION_ID} AS fedora-micro-build
 # ARG TARGETARCH
 RUN mkdir /rootfs
+COPY --from python-build /usr/local /rootfs
 RUN source /etc/os-release && \
     dnf install --releasever $VERSION_ID --nodocs -y \
     --installroot /rootfs --setopt install_weak_deps=false \
