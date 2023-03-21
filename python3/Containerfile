@@ -3,7 +3,7 @@
 ARG VERSION_ID
 FROM registry.fedoraproject.org/fedora:${VERSION_ID} AS python-build
 WORKDIR /usr/src/python
-RUN dnf install --nodocs --setopt install_weak_deps=false \
+RUN dnf install --nodocs -y --setopt install_weak_deps=false \
     autoconf bluez-libs-devel bzip2 bzip2-devel desktop-file-utils \
     expat-devel findutils gcc-c++ gdb gdbm-devel git-core \
     glibc-all-langpacks glibc-devel gmp-devel gnupg2 libGL-devel \
