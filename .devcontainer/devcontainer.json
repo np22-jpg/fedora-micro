@@ -1,5 +1,17 @@
 {
-  "image": "quay.io/buildah/stable",
-  "features": {
-  }
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"charliermarsh.ruff",
+				"ms-python.vscode-pylance",
+				"ms-python.python",
+				"foxundermoon.shell-format",
+				"timonwong.shellcheck",
+				"redhat.vscode-yaml"
+			]
+		}
+	}
 }
