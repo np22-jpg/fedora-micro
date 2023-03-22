@@ -31,13 +31,12 @@ RUN dnf install --nodocs -y --setopt install_weak_deps=false \
         --exclude test \
         --exclude tests \
         --exclude idle_test \
-        --exclude libpython*a \ 
-        /usr/local /python
+        --exclude libpython*a \
+        /usr/local/ /python
 
 FROM registry.fedoraproject.org/fedora:${VERSION_ID} AS fedora-micro-build
 # ARG TARGETARCH
 RUN mkdir /rootfs
-COPY --from=python-build /python /rootfs
 RUN source /etc/os-release && \
     dnf install --releasever $VERSION_ID --nodocs -y \
     --installroot /rootfs --setopt install_weak_deps=false \
@@ -50,6 +49,7 @@ RUN source /etc/os-release && \
     echo "app:x:1000:" >> /rootfs/etc/group && \
     echo "app:x:1000:1000::/app:/bin/bash" >> /rootfs/etc/passwd && \
     /bin/date +%Y%m%d_%H%M > /rootfs/etc/BUILDTIME
+COPY --from=python-build /python /usr
 
 FROM scratch AS fedora-micro
 LABEL maintainer="np22-jpg"
@@ -67,4 +67,8 @@ LABEL io.k8s.display-name="fedora-python3"
 
 COPY --from=fedora-micro-build /rootfs/ /
 COPY --from=fedora-micro-build /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
-CMD /usr/bin/python3
+CMD /usr/local/bin/python3
+
+# Mar 21, 2023
+# stripped: 51.9MB on-disk, 18.27 compressed
+# unstripped: 80.5MB on-disk, 30.04 compressed
