@@ -10,7 +10,8 @@
 				"ms-python.python",
 				"foxundermoon.shell-format",
 				"timonwong.shellcheck",
-				"redhat.vscode-yaml"
+				"redhat.vscode-yaml",
+				"yzhang.markdown-all-in-one"
 			]
 		}
 	}
