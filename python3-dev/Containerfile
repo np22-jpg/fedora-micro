@@ -5,9 +5,11 @@ FROM registry.fedoraproject.org/fedora:${VERSION_ID} AS release
 RUN source /etc/os-release && \
     dnf install --releasever $VERSION_ID -y \
     --setopt install_weak_deps=false \
-    python3 python3-pip curl wget jq fish && \
+    python3 python3-pip curl wget jq fish git util-linux-user buildah podman which && \
     dnf list installed > /etc/PACKAGES && \
     dnf clean all && \
+    dnf makecache && \
+    chsh -s /usr/bin/fish root && \
     /bin/date +%Y%m%d_%H%M > /etc/BUILDTIME
 
 LABEL maintainer="np22-jpg"
