@@ -1,7 +1,5 @@
 {
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
+	"image": "quay.io/np22-jpg/fedora-python3-dev",
 	"customizations": {
 		"vscode": {
 			"extensions": [

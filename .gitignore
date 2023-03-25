@@ -4,3 +4,6 @@ update
 cosign.key
 cosign
 venv
+build
+dist
+*.spec

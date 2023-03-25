@@ -1,4 +1,4 @@
 Installing required python packages:
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
-python -m pip install --upgrade pip wheel jinja2 requests
+python3 -m pip install --upgrade -r requirements.txt
