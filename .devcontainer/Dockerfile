@@ -1,2 +1,2 @@
-FROM mcr.microsoft.com/devcontainers/python:3.11-bullseye AS devel
-RUN apt update && apt upgrade -y && apt install -y podman buildah which binutils
+FROM np22-jpg/fedora/fedora-python3-dev AS devel
+# RUN apt update && apt upgrade -y && apt install -y podman buildah which binutils
