@@ -1,1 +1,0 @@
-FROM np22-jpg/fedora/fedora-python3-dev AS devel

@@ -1,0 +1,7 @@
+FROM quay.io/np22-jpg/fedora-python3-dev
+
+COPY requirements.txt .
+RUN python3 -m venv /opt/venv && \
+export PATH="/opt/venv:$PATH" && \
+python3 -m pip install --upgrade -r requirements.txt && \
+dnf makecache
