@@ -1,0 +1,17 @@
+{
+	"image": "quay.io/np22-jpg/fedora-python3-dev",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"charliermarsh.ruff",
+				"ms-python.vscode-pylance",
+				"ms-python.python",
+				"foxundermoon.shell-format",
+				"timonwong.shellcheck",
+				"redhat.vscode-yaml",
+				"yzhang.markdown-all-in-one"
+			]
+		}
+	},
+	"postCreateCommand":"python3 -m venv venv && chmod +x venv/bin/acticate && source venv/bin/activate && python3 -m pip install --upgrade -r requirements.txt"
+}

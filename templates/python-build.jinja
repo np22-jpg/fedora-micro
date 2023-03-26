@@ -1,0 +1,65 @@
+# Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
+# Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
+FROM --platform=$BUILDPLATFORM {{ builder_image }} AS python-build 
+ARG TARGETARCH
+WORKDIR /usr/src/python
+RUN {{ dnf_mount_arguments }} \
+    if [[ $TARGETARCH == arm64 ]]; then BUILDARCH=aarch64-unknown-linux-gnu; fi && \
+    if [[ $TARGETARCH == amd64 ]]; then BUILDARCH=x86_64-unknown-linux-gnu; fi && \
+    if [[ $TARGETARCH == ppc64le ]]; then BUILDARCH=powerpc64le-unknown-linux-gnu; fi && \
+    if [[ $TARGETARCH == s390x ]]; then BUILDARCH=s390x-unknown-linux-gnu; fi && \
+    if [[ $BUILDARCH == arm64 ]]; then BUILDARCH=aarch64-unknown-linux-gnu; fi && \
+    if [[ $BUILDARCH == amd64 ]]; then BUILDARCH=x86_64-unknown-linux-gnu; fi && \
+    if [[ $BUILDARCH == ppc64le ]]; then BUILDARCH=powerpc64le-unknown-linux-gnu; fi && \
+    if [[ $BUILDARCH == s390x ]]; then BUILDARCH=s390x-unknown-linux-gnu; fi && \
+    dnf install --nodocs -y --setopt install_weak_deps=false \
+    autoconf bluez-libs-devel bzip2 bzip2-devel desktop-file-utils \
+    expat-devel findutils gcc-c++ gdb gdbm-devel git-core \
+    glibc-all-langpacks glibc-devel gmp-devel gnupg2 libGL-devel \
+    libX11-devel libappstream-glib libb2-devel libffi-devel \
+    libnsl2-devel libtirpc-devel libuuid-devel make mpdecimal-devel \
+    ncurses-devel openssl-devel pkgconfig python-pip-wheel \
+    python-setuptools-wheel python3-rpm-generators python3.11 \
+    readline-devel rsync sqlite-devel tar tcl-devel tix-devel tk-devel \
+    tzdata valgrind-devel xz xz-devel zlib-devel ccache && \
+    CC="ccache gcc" && \
+    CXX="ccache g++" && \
+    curl -f {{ pythondownload }} | \
+    tar -xJC /usr/src/python --strip-components=1 && \
+    	./configure \
+        --build="$BUILDARCH" \
+        --host="$BUILDARCH" \
+		--enable-loadable-sqlite-extensions \
+		--enable-optimizations \
+		--enable-option-checking=fatal \
+		--enable-shared \
+		--with-lto \
+		--with-system-expat \
+		--without-ensurepip && \
+    LDFLAGS="{{ ldflags }}" make -j$(nproc) && \
+    make install && \
+    rsync -vr \
+        --exclude *.pyc \
+        --exclude *.pyo \
+        --exclude test \
+        --exclude tests \
+        --exclude idle_test \
+        --exclude libpython*a \
+        /usr/local/ /python
+
+FROM quay.io/np22-jpg/fedora-micro AS fedora-micro
+COPY --from=python-build /python /usr
+LABEL maintainer="np22-jpg"
+
+LABEL name="np22-jpg/fedora-python3"
+
+#labels for container catalog
+LABEL summary="{{ summary }}"
+LABEL description="{{ description }}"
+LABEL io.k8s.display-name="fedora-python3"
+
+CMD /usr/local/bin/python3
+
+# Mar 21, 2023
+# stripped: 51.9MB on-disk, 18.27 compressed
+# unstripped: 80.5MB on-disk, 30.04 compressed

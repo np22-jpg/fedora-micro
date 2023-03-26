@@ -1,0 +1,10 @@
+*.spec
+bin
+build
+cosign
+cosign.key
+current
+diff
+dist
+update
+venv

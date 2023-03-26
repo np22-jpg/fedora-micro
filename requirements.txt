@@ -1,0 +1,6 @@
+pip
+wheel
+jinja2
+requests
+pyinstaller
+docker

@@ -1,0 +1,11 @@
+{
+    "python3_dev": {
+        "builder_image": "registry.fedoraproject.org/fedora",
+        "dnf_mount_arguments": "--mount=type=cache,target=/var/cache/dnf --mount=type=cache,target=/root/.cache/ccache",
+        "dnf_installer": "registry.fedoraproject.org/fedora",
+        "summary": "Unofficial Fedora python3 micro image",
+        "description": "Very small image which doesn't install the package manager.",
+        "ldflags": "-s -w",
+        "pythondownload": "https://www.python.org/ftp/python/3.11.2/Python-3.11.2.tar.xz"
+    }
+}
