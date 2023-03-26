@@ -8,7 +8,7 @@ RUN source /etc/os-release && \
     nodejs:$NODE_VERSION && \
     dnf install --releasever $VERSION_ID -y \
     --setopt install_weak_deps=false \
-    nodejs npm curl wget jq fish && \
+    nodejs npm curl wget jq fish git util-linux-user buildah podman fuse-overlayfs slirp4netns which && \
     dnf list installed > /etc/PACKAGES && \
     dnf clean all && \
     npm install -g npm@latest && \
