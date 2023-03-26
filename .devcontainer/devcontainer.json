@@ -13,5 +13,8 @@
 			]
 		}
 	},
+	"mounts": [
+		"source=/dev/fuse,target=/dev/fuse,type=bind"
+	],
 	"postCreateCommand":"python3 -m venv venv && chmod +x venv/bin/acticate && source venv/bin/activate && python3 -m pip install --upgrade -r requirements.txt"
 }
