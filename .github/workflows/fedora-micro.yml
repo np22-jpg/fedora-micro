@@ -64,6 +64,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
+            --cap-add=SYS_ADMIN
 
       - name: Check for changes
         run: |
@@ -85,6 +86,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
+            --cap-add=SYS_ADMIN
 
       # PUSH
 
