@@ -72,7 +72,8 @@ jobs:
           local_container=$(buildah from fedora-micro:test)
           buildah run $local_container cat /etc/PACKAGES > "update" || echo "Packages not found!"
           diff current update > "diff" || true
-          [ -s diff ] || false
+          cat diff
+          [ -s diff ]
 
       - name: Build Image
         id: build-image
