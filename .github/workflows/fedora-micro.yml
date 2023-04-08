@@ -8,7 +8,7 @@ on:
 
 # I don't think anyone will use these with s390x or ppc64le
 env:
-  PLATFORMS: linux/amd64,linux/arm64
+  PLATFORMS: linux/amd64
   
 jobs:
   build_and_push_docker_images:
@@ -59,8 +59,6 @@ jobs:
         run:  |
           dnf update -y
           dnf install podman -y
-          qemu_reset=$(buildah from docker.io/multiarch/qemu-user-static:register)
-          buildah run $qemu_reset --reset
           dnf remove qemu-user-static -y
           dnf install qemu-user-static -y
           alias docker="podman"
