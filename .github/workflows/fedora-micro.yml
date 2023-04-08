@@ -76,10 +76,10 @@ jobs:
       - name: Check for changes
         run: |
           echo "Grabbing current container"
-          remote_container=$(buildah from quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }})
+          remote_container=$(buildah from quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }}) && echo $remote_container
           buildah run $remote_container cat /etc/PACKAGES > "current" && cat current
           echo "Grabbing update container"
-          local_container=$(buildah from fedora-micro:test)
+          local_container=$(buildah from fedora-micro:test) && echo $local_container
           buildah run $local_container cat /etc/PACKAGES > "update" && cat update
           echo "Generating diff"
           diff current update > "diff" || true
