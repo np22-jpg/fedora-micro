@@ -43,10 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/buildah/stable:v1.29
-      options: |
-        --privileged
-        --cap-add=SETGID
-        --cap-add=SETUID
+      options: --privileged --cap-add=SETGID --cap-add=SETUID
 
     name: Docker Images
     steps:
