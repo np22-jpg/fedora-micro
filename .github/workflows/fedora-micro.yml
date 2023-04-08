@@ -61,7 +61,8 @@ jobs:
       - id: build-test
         uses: redhat-actions/buildah-build@v2
         with:
-          image-with-tag: "fedora-micro:test"
+          image: fedora-micro
+          tags: test
           containerfiles: |
             ./${{ matrix.images }}/Containerfile
           platforms: linux/amd64
