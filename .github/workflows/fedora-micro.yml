@@ -50,6 +50,12 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Download podman and refresh metadata
+        run:  |
+          dnf update -y
+          dnf install podman -y
+          alias docker="podman"
+
       # BUILD
 
       - id: build-test
@@ -65,6 +71,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
+            -v /var/cache/dnf:/var/cache/dnf:O
 
       - name: Check for changes
         run: |
@@ -77,7 +84,7 @@ jobs:
           echo "Generating diff"
           diff current update > "diff" || true
           cat diff
-          [ -s diff ] || false
+          [ -s diff ] || echo "No changes!" && false
 
       - name: Build Image
         id: build-image
@@ -93,6 +100,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
+            -v /var/cache/dnf:/var/cache/dnf:O
 
       # PUSH
 
