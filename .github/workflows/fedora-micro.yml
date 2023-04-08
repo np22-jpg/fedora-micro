@@ -57,14 +57,13 @@ jobs:
       # https://github.com/rpm-software-management/mock/issues/277
       - name: Download podman and refresh metadata
         run:  |
+          qemu-reset=$(buildah from docker.io/multiarch/qemu-user-static:register)
+          podman run --rm --privileged $qemu-reset --reset
           dnf update -y
-          dnf remove qemu-user-static -y
           dnf install qemu-user-binfmt -y
-          dnf remove qemu-user-binfmt -y
           dnf install qemu-user-static -y
           dnf install podman -y
           alias docker="podman"
-
       # BUILD
 
       - name: Build Test Image
