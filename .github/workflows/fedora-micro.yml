@@ -56,7 +56,8 @@ jobs:
       - name: Download podman and refresh metadata
         run:  |
           dnf update -y
-          dnf install podman qemu-user-binfmt -y
+          dnf reinstall qemu-user-binfmt qemu-user-static -y
+          dnf install podman -y
           alias docker="podman"
 
       # BUILD
