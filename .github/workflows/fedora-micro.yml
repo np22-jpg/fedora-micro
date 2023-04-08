@@ -19,12 +19,8 @@ jobs:
         version: [ 37, 38, 39 ]
         images: [ micro, node, npm, python3, python3-dev ]
         exclude:
-          - images: node
-            version: 38
           - images: node          
             version: 39
-          - images: npm
-            version: 38
           - images: npm
             version: 39
         include:
@@ -50,15 +46,23 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Cache DNF
+        id: cache-dnf
+        uses: actions/cache@v3
+        with:
+          path: dnfcache
+          key: ${{ runner.os }}-dnf
+
       - name: Download podman and refresh metadata
         run:  |
-          dnf update -y
-          dnf install podman -y
+          dnf update -y --setopt=cachedir=dnfcache
+          dnf install podman qemu-user-binfmt -y --setopt=cachedir=dnfcache
           alias docker="podman"
 
       # BUILD
 
-      - id: build-test
+      - name: Build Test Image
+        id: build-test
         uses: redhat-actions/buildah-build@v2
         with:
           image: fedora-micro
@@ -71,7 +75,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
-            -v /var/cache/dnf:/var/cache/dnf:O
+            -v dnfcache:/var/cache/dnf:O
 
       - name: Check for changes
         run: |
@@ -100,7 +104,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
-            -v /var/cache/dnf:/var/cache/dnf:O
+            -v dnfcache:/var/cache/dnf:O
 
       # PUSH
 
