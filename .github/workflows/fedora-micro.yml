@@ -42,7 +42,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: quay.io/buildah/stable:v1.29
+      image: quay.io/buildah/stable:latest
       options: --privileged --cap-add=SETGID --cap-add=SETUID
 
     name: Docker Images
@@ -69,9 +69,10 @@ jobs:
         run: |
           remote_container=$(buildah from quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }})
           buildah run $remote_container cat /etc/PACKAGES > "current" || echo "Packages not found!"
-          buildah run fedora-micro:test cat /etc/PACKAGES > "update" || echo "Packages not found!"
+          local_container=$(buildah from fedora-micro:test)
+          buildah run $local_container cat /etc/PACKAGES > "update" || echo "Packages not found!"
           diff current update > "diff" || true
-          [ -s diff ]
+          [ -s diff ] || false
 
       - name: Build Image
         id: build-image
