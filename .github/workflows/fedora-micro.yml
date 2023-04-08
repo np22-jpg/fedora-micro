@@ -59,7 +59,8 @@ jobs:
         run:  |
           dnf update -y
           dnf install podman -y
-          podman run --privileged --rm docker.io/multiarch/qemu-user-static:register --reset
+          qemu_reset=$(buildah from docker.io/multiarch/qemu-user-static:register)
+          buildah run $qemu_reset --reset
           dnf remove qemu-user-static -y
           dnf install qemu-user-static -y
           alias docker="podman"
