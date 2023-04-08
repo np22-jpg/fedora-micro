@@ -75,7 +75,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
-            -v dnfcache:/var/cache/dnf:O
+            -v $(pwd)/dnfcache:/var/cache/dnf:O
 
       - name: Check for changes
         run: |
@@ -104,7 +104,7 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
-            -v dnfcache:/var/cache/dnf:O
+            -v $(pwd)/dnfcache:/var/cache/dnf:O
 
       # PUSH
 
