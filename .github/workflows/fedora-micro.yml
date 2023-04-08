@@ -50,6 +50,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Adjust BUILDAH_ISOLATION
+        run:  export BUILDAH_ISOLATION=chroot
+
       # BUILD
 
       - id: build-test
