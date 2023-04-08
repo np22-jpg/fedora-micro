@@ -1,13 +1,11 @@
 # Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
 # Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
 ARG VERSION_ID
-FROM --platform=$BUILDPLATFORM registry.fedoraproject.org/fedora:${VERSION_ID} AS release
-ARG TARGETARCH
+FROM registry.fedoraproject.org/fedora:${VERSION_ID} AS release
 RUN source /etc/os-release && \
     if [[ $TARGETARCH == arm64 ]]; then TARGETARCH=aarch64; fi && \
     dnf install --releasever $VERSION_ID -y \
     --setopt install_weak_deps=false \
-    --forcearch=$TARGETARCH \
     python3 python3-pip curl wget jq fish git util-linux-user buildah podman fuse-overlayfs slirp4netns which && \
     dnf list installed > /etc/PACKAGES && \
     dnf clean all && \
