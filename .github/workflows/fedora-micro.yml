@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/buildah/stable:latest
-      options: --privileged --cap-add=SETGID --cap-add=SETUID
+      options: --privileged
 
     name: Docker Images
     steps:
@@ -61,8 +61,7 @@ jobs:
       - id: build-test
         uses: redhat-actions/buildah-build@v2
         with:
-          image: fedora-micro
-          tags: test
+          image-with-tag: "fedora-micro:test"
           containerfiles: |
             ./${{ matrix.images }}/Containerfile
           platforms: linux/amd64
@@ -77,12 +76,10 @@ jobs:
         run: |
           echo "Grabbing current container"
           remote_container=$(buildah from quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }})
-          buildah run $remote_container cat /etc/PACKAGES > "current"
-          cat current
+          buildah run $remote_container cat /etc/PACKAGES > "current" && cat current
           echo "Grabbing update container"
           local_container=$(buildah from fedora-micro:test)
-          buildah run $local_container cat /etc/PACKAGES > "update"
-          cat update
+          buildah run $local_container cat /etc/PACKAGES > "update" && cat update
           echo "Generating diff"
           diff current update > "diff" || true
           cat diff
@@ -106,15 +103,15 @@ jobs:
 
       # PUSH
 
-      - name: Push To Quay.io
-        id: push-to-quay
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          username: np22-jpg+fedoramicro
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
-          registry: quay.io/np22-jpg
+      - uses: sigstore/cosign-installer@v3.0.2 
+      - name: Write Cosign Key
+        run:  |
+          echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
+          wc -c cosign.key;
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}       
+
 
       - name: Push To Docker Hub
         id: push-to-docker
@@ -126,6 +123,31 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           registry: docker.io/np22jpg
 
+      - name: Sign Docker Hub Image
+        run:  |
+          cosign login docker.io -u np22jpg -p ${{ secrets.DOCKER_PASSWORD }}
+          cosign sign -y --key cosign.key docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
+        env:
+          COSIGN_EXPERIMENTAL: false
+          DOCKER_TAGS: ${{ steps.push-to-docker.outputs.digest }}
+
+
+      - name: Push To Quay.io
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          username: np22-jpg+fedoramicro
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: quay.io/np22-jpg
+
+      - name: Sign Quay.io Image
+        run:  |
+          cosign login quay.io -u np22-jpg+fedoramicro -p ${{ secrets.REGISTRY_PASSWORD }}
+          cosign sign -y --key cosign.key quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
+
+
       - name: Push To GHCR
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -136,41 +158,6 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}
 
-
-      - name: Print image url
-        run:  |
-          echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
-          echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
-          echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
-
-      # SIGN
-
-      - uses: sigstore/cosign-installer@v3.0.2 
-      - name: Write Cosign Key
-        run:  |
-          echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
-          wc -c cosign.key;
-        env:
-          COSIGN_EXPERIMENTAL: false
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}       
-
-
-      - name: Sign Quay.io Image
-        run:  |
-          cosign login quay.io -u np22-jpg+fedoramicro -p ${{ secrets.REGISTRY_PASSWORD }}
-          cosign sign -y --key cosign.key quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
-        env:
-          COSIGN_EXPERIMENTAL: false
-          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
-
-      - name: Sign Docker Hub Image
-        run:  |
-          cosign login docker.io -u np22jpg -p ${{ secrets.DOCKER_PASSWORD }}
-          cosign sign -y --key cosign.key docker.io/np22jpg/${{ steps.build-image.outputs.image }}@${DOCKER_TAGS}
-        env:
-          COSIGN_EXPERIMENTAL: false
-          DOCKER_TAGS: ${{ steps.push-to-docker.outputs.digest }}
-
       - name: Sign GHCR Image
         run:  |
           cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
@@ -178,3 +165,13 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: false
           GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
+
+
+      - name: Print image URLs
+        run:  |
+          echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+          echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
+          echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
+        env:
+          COSIGN_EXPERIMENTAL: false
+          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
