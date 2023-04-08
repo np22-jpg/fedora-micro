@@ -147,7 +147,9 @@ jobs:
         run:  |
           cosign login quay.io -u np22-jpg+fedoramicro -p ${{ secrets.REGISTRY_PASSWORD }}
           cosign sign -y --key cosign.key quay.io/np22-jpg/${{ steps.build-image.outputs.image }}@${QUAY_TAGS}
-
+        env:
+          COSIGN_EXPERIMENTAL: false
+          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
 
       - name: Push To GHCR
         id: push-to-ghcr
@@ -173,6 +175,3 @@ jobs:
           echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
           echo "Image pushed to ${{ steps.push-to-docker.outputs.registry-paths }}"
           echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
-        env:
-          COSIGN_EXPERIMENTAL: false
-          QUAY_TAGS: ${{ steps.push-to-quay.outputs.digest }}
