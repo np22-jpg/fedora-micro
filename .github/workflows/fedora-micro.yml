@@ -67,8 +67,9 @@ jobs:
 
       - name: Check for changes
         run: |
-          podman run --name current "$remote_container" cat /etc/PACKAGES > "current" || echo "Packages not found!"
-          podman run --name update "$local_container" cat /etc/PACKAGES > "update" || echo "Packages not found!"
+          remote_container=$(buildah from quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }})
+          buildah run $remote_container cat /etc/PACKAGES > "current" || echo "Packages not found!"
+          buildah run fedora-micro:test cat /etc/PACKAGES > "update" || echo "Packages not found!"
           diff current update > "diff" || true
           [ -s diff ]
 
