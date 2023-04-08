@@ -77,10 +77,12 @@ jobs:
         run: |
           echo "Grabbing current container"
           remote_container=$(buildah from quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }})
-          buildah run $remote_container cat /etc/PACKAGES > "current" || echo "Packages not found!"
+          buildah run $remote_container cat /etc/PACKAGES > "current"
+          cat current
           echo "Grabbing update container"
           local_container=$(buildah from fedora-micro:test)
-          buildah run $local_container cat /etc/PACKAGES > "update" || echo "Packages not found!"
+          buildah run $local_container cat /etc/PACKAGES > "update"
+          cat update
           echo "Generating diff"
           diff current update > "diff" || true
           cat diff
