@@ -83,7 +83,8 @@ jobs:
           buildah run $local_container cat /etc/PACKAGES > "update" || echo "Packages not found!"
           echo "Generating diff"
           diff current update > "diff" || true
-          { [ -s diff ] && cat diff } || { echo "No changes" && false; }
+          cat diff
+          [ -s diff ] || { echo "No changes" && false }
 
       - name: Build Image
         id: build-image
