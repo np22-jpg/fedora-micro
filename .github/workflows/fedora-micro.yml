@@ -58,7 +58,7 @@ jobs:
       - name: Download podman and refresh metadata
         run:  |
           qemu_reset=$(buildah from docker.io/multiarch/qemu-user-static:register)
-          buildah run --rm --privileged $qemu_reset --reset
+          buildah run --privileged $qemu_reset --reset
           dnf update -y
           dnf install qemu-user-binfmt -y
           dnf install qemu-user-static -y
