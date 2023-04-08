@@ -41,8 +41,9 @@ jobs:
       packages: write
 
     runs-on: ubuntu-latest
-    # container:
-    #   image: quay.io/buildah/stable:v1.28
+    container:
+      image: quay.io/buildah/stable:v1.29
+      options: --privileged
 
     name: Docker Images
     steps:
@@ -61,11 +62,6 @@ jobs:
           build-args: |
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
-
-      - name: Install qemu and podman
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-user-static podman
 
       - name: Check for changes
         run: |
