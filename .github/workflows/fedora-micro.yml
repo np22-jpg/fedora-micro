@@ -62,6 +62,8 @@ jobs:
           build-args: |
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
+          extra-args: |
+            --cap-add=SYS_CHROOT
 
       - name: Check for changes
         run: |
@@ -81,6 +83,8 @@ jobs:
           build-args: |
             VERSION_ID=${{ matrix.version }}
             NODE_VERSION=${{ matrix.node-version }}
+          extra-args: |
+            --cap-add=SYS_CHROOT
 
       # PUSH
 
