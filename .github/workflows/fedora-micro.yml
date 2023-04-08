@@ -8,7 +8,7 @@ on:
 
 # I don't think anyone will use these with s390x or ppc64le
 env:
-  PLATFORMS: linux/amd64
+  PLATFORMS: linux/amd64,linux/arm64
   
 jobs:
   build_and_push_docker_images:
@@ -38,8 +38,8 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: quay.io/buildah/stable:latest
-      options: --privileged
+      image: quay.io/buildah/upstream:latest
+      options: --privileged --device /dev/fuse:rw --security-opt label=disable --security-opt seccomp=unconfined
 
     name: Docker Images
     steps:
@@ -62,6 +62,7 @@ jobs:
           dnf remove qemu-user-static -y
           dnf install qemu-user-static -y
           alias docker="podman"
+          rm /etc/containers/storage.conf
 
       # BUILD
 
