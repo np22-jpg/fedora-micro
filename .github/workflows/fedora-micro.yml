@@ -50,9 +50,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Adjust BUILDAH_ISOLATION
-        run:  export BUILDAH_ISOLATION=chroot
-
       # BUILD
 
       - id: build-test
@@ -67,13 +64,13 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
-            --cap-add=SYS_ADMIN
 
       - name: Check for changes
         run: |
-          chmod +x ./check_for_rpm_changes.sh
-          buildah unshare ./check_for_rpm_changes.sh quay.io/np22-jpg/fedora-${{ matrix.images }}:${{ matrix.version }} fedora-micro:test
-
+          podman run --name current "$remote_container" cat /etc/PACKAGES > "current" || echo "Packages not found!"
+          podman run --name update "$local_container" cat /etc/PACKAGES > "update" || echo "Packages not found!"
+          diff current update > "diff" || true
+          [ -s diff ]
 
       - name: Build Image
         id: build-image
@@ -89,7 +86,6 @@ jobs:
             NODE_VERSION=${{ matrix.node-version }}
           extra-args: |
             --cap-add=SYS_CHROOT
-            --cap-add=SYS_ADMIN
 
       # PUSH
 
