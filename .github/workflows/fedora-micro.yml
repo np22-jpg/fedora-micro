@@ -106,32 +106,12 @@ jobs:
 
       # PUSH
 
-      - name: Log in to Quay.io
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: np22-jpg+fedoramicro
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-          registry: quay.io/np22-jpg
-
-      - name: Log in to Docker Hub
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: np22jpg
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          registry: docker.io
-
-      - name: Log in to GHCR
-        uses: redhat-actions/podman-login@v1
-        with:
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-          registry: ghcr.io/${{ github.repository_owner }}
-
-
       - name: Push To Quay.io
         id: push-to-quay
         uses: redhat-actions/push-to-registry@v2
         with:
+          username: np22-jpg+fedoramicro
+          password: ${{ secrets.REGISTRY_PASSWORD }}
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
           registry: quay.io/np22-jpg
@@ -140,6 +120,8 @@ jobs:
         id: push-to-docker
         uses: redhat-actions/push-to-registry@v2
         with:
+          username: np22jpg
+          password: ${{ secrets.DOCKER_PASSWORD }}
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
           registry: docker.io/np22jpg
@@ -148,6 +130,8 @@ jobs:
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}
