@@ -8,7 +8,7 @@ on:
 
 # I don't think anyone will use these with s390x or ppc64le
 env:
-  PLATFORMS: linux/amd64,linux/arm64
+  PLATFORMS: linux/amd64
   
 jobs:
   build_and_push_docker_images:
