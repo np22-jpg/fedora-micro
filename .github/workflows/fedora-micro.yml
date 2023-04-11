@@ -62,7 +62,6 @@ jobs:
           dnf remove qemu-user-static -y
           dnf install qemu-user-static -y
           alias docker="podman"
-          rm /etc/containers/storage.conf
 
       # BUILD
 
