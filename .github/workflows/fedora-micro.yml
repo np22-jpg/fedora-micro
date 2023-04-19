@@ -17,14 +17,14 @@ jobs:
       fail-fast: false
       matrix:
         version: [ 37, 38, 39 ]
-        images: [ micro, node, npm, python3, python3-dev ]
+        images: [ micro, node, npm, python3, python3-dev, code ]
         exclude:
           - images: node          
             version: 39
           - images: npm
             version: 39
         include:
-          - version: 37
+          - version: 38
             tag: latest
           - version: 39
             tag: rawhide
