@@ -1,0 +1,21 @@
+# Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
+# Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
+ARG VERSION_ID
+FROM registry.fedoraproject.org/fedora-toolbox:${VERSION_ID} AS release
+RUN source /etc/os-release && \
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
+    sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo' && \
+    dnf install --releasever $VERSION_ID -y \
+    python3 python3-pip curl wget jq zsh git util-linux-user buildah podman fuse-overlayfs slirp4netns \
+    which dnf5 sqlite code pinentry clang llvm clang-tools-extra cmake ninja-build && \
+    dnf list installed > /etc/PACKAGES && \
+    dnf clean all && \
+    ln -s /usr/bin/dnf5 /usr/local/bin/dnf && \
+    dnf5 makecache && \
+    chsh -s /usr/bin/zsh root && \
+    /bin/date +%Y%m%d_%H%M > /etc/BUILDTIME
+
+LABEL maintainer="np22-jpg"
+
+LABEL name="np22-jpg/fedora-code"
+LABEL summary="Opinionated Fedora development image for toolbox."
