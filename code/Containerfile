@@ -7,7 +7,7 @@ RUN source /etc/os-release && \
     sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo' && \
     dnf install --releasever $VERSION_ID -y \
     python3 python3-pip curl wget jq zsh git util-linux-user buildah podman fuse-overlayfs slirp4netns \
-    which dnf5 sqlite code pinentry clang llvm clang-tools-extra cmake ninja-build && \
+    which dnf5 sqlite code pinentry clang llvm clang-tools-extra cmake ninja-build nvim && \
     dnf list installed > /etc/PACKAGES && \
     dnf clean all && \
     ln -s /usr/bin/dnf5 /usr/local/bin/dnf && \
