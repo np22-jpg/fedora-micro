@@ -1,4 +1,5 @@
 name: fedora-micro
+runs-on: self-hosted
 
 on:
   push:
