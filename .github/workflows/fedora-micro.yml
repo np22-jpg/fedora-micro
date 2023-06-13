@@ -1,5 +1,4 @@
 name: fedora-micro
-runs-on: self-hosted
 
 on:
   push:
@@ -13,6 +12,7 @@ env:
   
 jobs:
   build_and_push_docker_images:
+    runs-on: self-hosted
     continue-on-error: true
     strategy:
       fail-fast: false
