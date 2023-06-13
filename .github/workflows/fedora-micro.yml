@@ -37,7 +37,6 @@ jobs:
       contents: read
       packages: write
 
-    runs-on: ubuntu-latest
     container:
       image: quay.io/buildah/upstream:latest
       options: --privileged --device /dev/fuse:rw --security-opt label=disable --security-opt seccomp=unconfined
