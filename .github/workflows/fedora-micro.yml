@@ -112,7 +112,7 @@ jobs:
 
       # PUSH
 
-      - uses: sigstore/cosign-installer@v3.0.3 
+      - uses: sigstore/cosign-installer@v3.1.1 
       - name: Write Cosign Key
         run:  |
           echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
