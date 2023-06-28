@@ -57,11 +57,7 @@ jobs:
       # https://github.com/rpm-software-management/mock/issues/277
       - name: Download podman and refresh metadata
         run:  |
-          dnf update -y
           dnf install podman -y
-          dnf remove qemu-user-static -y
-          dnf install qemu-user-static -y
-          alias docker="podman"
 
       # BUILD
 
