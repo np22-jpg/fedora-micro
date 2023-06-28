@@ -2,12 +2,12 @@
 # Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
 FROM registry.access.redhat.com/ubi9 AS release
 ARG NODE_VERSION
-RUN source /etc/os-release && \
+RUN dnf update -y && \
     dnf module enable --releasever / -y \
     nodejs:18 && \
     dnf install --releasever / -y \
     --setopt install_weak_deps=false \
-    nodejs npm curl wget jq fish git util-linux-user buildah podman fuse-overlayfs slirp4netns which && \
+    nodejs npm wget jq git podman fuse-overlayfs slirp4netns which && \
     dnf list installed > /etc/PACKAGES && \
     dnf clean all && \
     npm install -g npm@latest && \
@@ -20,4 +20,4 @@ LABEL name="np22-jpg/fedora-npm"
 LABEL summary="Unofficial Fedora npm image."
 LABEL description="A not-so-light image built for developing nodejs apps. Keeps in sync with fedora-node."
 
-CMD /usr/bin/fish
+CMD /usr/bin/bash
