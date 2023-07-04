@@ -26,7 +26,7 @@ ENV ALLOW_RESTARTS=0 \
     BUILD=0 \
     COMMIT=0 \
     CONFIGS=0 \
-    CONTAINERS=0 \
+    CONTAINERS=1 \
     DISTRIBUTION=0 \
     EVENTS=1 \
     EXEC=0 \
@@ -34,19 +34,19 @@ ENV ALLOW_RESTARTS=0 \
     IMAGES=0 \
     INFO=0 \
     LOG_LEVEL=info \
-    NETWORKS=1 \
+    NETWORKS=0 \
     NODES=0 \
     PING=1 \
     PLUGINS=0 \
     POST=0 \
     SECRETS=0 \
-    SERVICES=1 \
+    SERVICES=0 \
     SESSION=0 \
     SOCKET_PATH=/var/run/docker.sock \
     SWARM=0 \
     SYSTEM=0 \
-    TASKS=1 \
-    VERSION=1 \
+    TASKS=0 \
+    VERSION=0 \
     VOLUMES=0
 ADD socket-proxy/haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
 
@@ -60,5 +60,9 @@ STOPSIGNAL SIGUSR1
 USER haproxy
 
 WORKDIR /var/lib/haproxy
+
+LABEL summary="Unofficial UBI traefik socket proxy image"
+LABEL description="Very small image which doesn't install the package manager."
+LABEL io.k8s.display-name="fedora-node"
 
 ENTRYPOINT [ "/usr/sbin/haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg" ]
