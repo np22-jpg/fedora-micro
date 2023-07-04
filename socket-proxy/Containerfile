@@ -1,0 +1,64 @@
+# Based on https://catalog.redhat.com/software/containers/ubi8-micro/601a84aadd19c7786c47c8ea?container-tabs
+# Also see https://github.com/AlmaLinux/docker-images/blob/master/dockerfiles/alma9/Dockerfile.micro
+
+FROM registry.access.redhat.com/ubi9 AS build
+COPY --from=registry.access.redhat.com/ubi9/ubi-micro / /rootfs
+RUN dnf install --releasever / --nodocs -y \
+    --installroot /rootfs --setopt install_weak_deps=false \
+    --setopt=cachedir=/var/cache/dnf \
+    haproxy && \
+    dnf --installroot /rootfs list installed > /rootfs/etc/PACKAGES && \
+    dnf --installroot /rootfs clean all && \
+    rm -rf /rootfs/var/log/dnf* /rootfs/var/log/yum.* && \
+    echo "haproxy:x:1000:" >> /rootfs/etc/group && \
+    echo "haproxy:x:1000:1000::/app:/bin/bash" >> /rootfs/etc/passwd && \
+    /bin/date +%Y%m%d_%H%M > /rootfs/etc/BUILDTIME
+
+RUN /rootfs/usr/sbin/haproxy -v
+
+FROM scratch AS fedora-socket-proxy
+LABEL maintainer="np22-jpg"
+
+# https://github.com/Tecnativa/docker-socket-proxy/blob/master/Dockerfile
+EXPOSE 2375
+ENV ALLOW_RESTARTS=0 \
+    AUTH=0 \
+    BUILD=0 \
+    COMMIT=0 \
+    CONFIGS=0 \
+    CONTAINERS=0 \
+    DISTRIBUTION=0 \
+    EVENTS=1 \
+    EXEC=0 \
+    GRPC=0 \
+    IMAGES=0 \
+    INFO=0 \
+    LOG_LEVEL=info \
+    NETWORKS=1 \
+    NODES=0 \
+    PING=1 \
+    PLUGINS=0 \
+    POST=0 \
+    SECRETS=0 \
+    SERVICES=1 \
+    SESSION=0 \
+    SOCKET_PATH=/var/run/docker.sock \
+    SWARM=0 \
+    SYSTEM=0 \
+    TASKS=0 \
+    VERSION=1 \
+    VOLUMES=0
+ADD socket-proxy/haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
+
+LABEL name="np22-jpg/fedora-socket-proxy"
+
+COPY --from=build /rootfs/ /
+COPY --from=build /etc/yum.repos.d/ubi.repo /etc/yum.repos.d/ubi.repo
+
+STOPSIGNAL SIGUSR1
+
+USER haproxy
+
+WORKDIR /var/lib/haproxy
+
+ENTRYPOINT [ "/usr/sbin/haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg" ]
