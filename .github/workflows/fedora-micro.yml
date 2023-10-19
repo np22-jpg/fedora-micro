@@ -44,7 +44,7 @@ jobs:
     name: Docker Images
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache DNF
         id: cache-dnf
