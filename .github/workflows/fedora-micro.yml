@@ -25,7 +25,7 @@ jobs:
           - images: npm
             version: 39
         include:
-          - version: 38
+          - version: 39
             tag: latest
           - version: 39
             tag: rawhide
