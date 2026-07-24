@@ -120,7 +120,7 @@ jobs:
 
       - name: Push To Docker Hub
         id: push-to-docker
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           username: np22jpg
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -139,7 +139,7 @@ jobs:
 
       - name: Push To Quay.io
         id: push-to-quay
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           username: np22-jpg+fedoramicro
           password: ${{ secrets.REGISTRY_PASSWORD }}
@@ -157,7 +157,7 @@ jobs:
 
       - name: Push To GHCR
         id: push-to-ghcr
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           username: ${{ github.actor }}
           password: ${{ github.token }}
