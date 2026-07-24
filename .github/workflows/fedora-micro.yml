@@ -63,7 +63,7 @@ jobs:
 
       - name: Build Test Image
         id: build-test
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v3
         with:
           image: fedora-micro
           tags: test
@@ -92,7 +92,7 @@ jobs:
 
       - name: Build Image
         id: build-image
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v3
         with:
           image: fedora-${{ matrix.images }}
           tags: ${{ matrix.version }} ${{ matrix.tag }}
